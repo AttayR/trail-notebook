@@ -7,7 +7,7 @@ cover_image: https://raw.githubusercontent.com/AttayR/trail-notebook/19439186a76
 
 *This is a submission for the [Hacktoberfest Open-Source AI Challenge Week 1: Touch Grass](https://dev.to/challenges/hacktoberfest-week1-2026-10-05)*
 
-At home, airplane mode on. I hold my phone near a second device playing a Yellow-vented Bulbul call from YouTube, and tap Listen. Nine seconds later the screen says **Yellow-vented Bulbul, very likely**. Then a language model running on the phone writes:
+At home, airplane mode on. I hold my phone near a second device playing a Yellow-vented Bulbul call from YouTube, and tap Listen. About 11 seconds later (9 of them listening) the screen says **Yellow-vented Bulbul, very likely**. Then a language model running on the phone writes:
 
 > Yellow-vented Bulbul is clearly audible, a steady, melodic chirp.
 > **Next:** Walk to the corner of the garden, observe the area.
@@ -19,6 +19,8 @@ To be clear, this was an indoor test with a recording, not a real bird on a trai
 **Trail Notebook** is an offline field notebook for walks. You hear a bird, take the phone out, and tap one button. It listens for 9 seconds, buzzes, and names the species. Then Gemma, running on the phone, writes a two-line entry: a short **NOTE** about the moment and a **NEXT** line telling you what to look or listen for.
 
 Then the phone goes back in your pocket. One button, no feed, no chat box.
+
+**748 MB downloaded once. 282 ms from end of listening to species. 39 tokens/s from Gemma. Zero network after that.**
 
 - **Listen mode:** BirdNET V2.4 (6,522 classes) runs on the phone. You see the top species and up to two alternates, with a confidence word ("very likely", "likely", "possible") instead of a raw score.
 - **Tell-it mode:** you saw something, or heard something it can't name? Type "three crows chasing a hawk over the canal". Gemma writes the same NOTE and NEXT, and the prompt tells it not to name a species you didn't.
@@ -34,7 +36,7 @@ After a one-time download at home, nothing in this loop touches the network.
 
 ![Trail Notebook demo](https://raw.githubusercontent.com/AttayR/trail-notebook/main/docs/demo/trail-notebook-demo.gif)
 
-A 16-second screen recording from the S23 Ultra: Listen, countdown, Yellow-vented Bulbul "likely", Gemma streams the note, "Saved to journal · 12.8 s" (including the 9 seconds of listening). [Full-quality MP4](https://github.com/AttayR/trail-notebook/blob/main/docs/demo/trail-notebook-demo.mp4).
+A 16-second screen recording from a separate indoor run on the S23 Ultra: Listen, countdown, Yellow-vented Bulbul "likely", Gemma streams the note, "Saved to journal · 12.8 s" (including the 9 seconds of listening). [Full-quality MP4](https://github.com/AttayR/trail-notebook/blob/main/docs/demo/trail-notebook-demo.mp4).
 
 **Try it:** [Android APK, v0.1.0](https://github.com/AttayR/trail-notebook/releases/tag/v0.1.0) (arm64, 134 MB). The models are not in the APK. The app downloads them on first launch, so use Wi-Fi.
 
