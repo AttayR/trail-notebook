@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { ModelDownloadState } from '../hooks/useModels';
 import { colors, spacing } from '../theme';
 
-const mb = (b: number) => (b / 1e6).toFixed(0);
+const mb = (b: number) => (b / 1e6).toFixed(b < 10e6 ? 1 : 0);
 
 export function DownloadProgress({ model }: { model: ModelDownloadState }) {
   const pct = model.totalBytes > 0 ? Math.min(1, model.bytesWritten / model.totalBytes) : 0;
