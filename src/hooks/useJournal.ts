@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 
 import type { Entry } from '../core/types';
 import { listEntries } from '../services/db/entries';
+import { recordBattery } from '../services/metricsExport';
 
 export function useJournal() {
   const [entries, setEntries] = useState<Entry[] | null>(null);
@@ -17,6 +18,11 @@ export function useJournal() {
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, []);
 
-  useFocusEffect(reload);
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+      recordBattery('journal_open');
+    }, [reload]),
+  );
   return { entries, error, reload };
 }

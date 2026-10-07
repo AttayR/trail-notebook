@@ -1,0 +1,710 @@
+{
+  "exportedAt": "2026-10-07T19:15:23.637Z",
+  "app": {
+    "version": "1.0.0",
+    "llm": "gemma-3-1b-it-Q4_0"
+  },
+  "device": {
+    "platform": "android",
+    "model": "SM-S918B",
+    "osName": "samsung/dm3qxxx/dm3q:16/BP4A.251205.006/S918BXXU9FZDP:user/release-keys",
+    "osVersion": "16",
+    "isDevice": true,
+    "totalMemoryGB": 10.8,
+    "yearClass": 2016
+  },
+  "models": [
+    {
+      "id": "birdnet-v2.4-labels-en",
+      "file": "BirdNET_GLOBAL_6K_V2.4_Labels_en.txt",
+      "expectedBytes": 259894,
+      "onDiskBytes": 259894,
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "id": "birdnet-v2.4-fp16",
+      "file": "BirdNET_GLOBAL_6K_V2.4_Model_FP16.tflite",
+      "expectedBytes": 25932528,
+      "onDiskBytes": 25932528,
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "id": "gemma-3-1b-it-Q4_0",
+      "file": "gemma-3-1b-it-Q4_0.gguf",
+      "expectedBytes": 721918496,
+      "onDiskBytes": 721918496,
+      "license": "Gemma Terms of Use"
+    }
+  ],
+  "totalModelBytes": 748110918,
+  "summary": {
+    "battery": {
+      "count": 5,
+      "min": 60,
+      "median": 64,
+      "p90": 67.2,
+      "max": 68,
+      "mean": 64.4
+    },
+    "birdnet_load": {
+      "count": 4,
+      "min": 102,
+      "median": 122.5,
+      "p90": 138.3,
+      "max": 141,
+      "mean": 122
+    },
+    "birdnet_window": {
+      "count": 8,
+      "min": 51,
+      "median": 53,
+      "p90": 55,
+      "max": 55,
+      "mean": 53.1
+    },
+    "birdnet_window_each": {
+      "count": 40,
+      "min": 38,
+      "median": 53,
+      "p90": 60.4,
+      "max": 131,
+      "mean": 55.6
+    },
+    "download": {
+      "count": 3,
+      "min": 1259,
+      "median": 12831,
+      "p90": 262435.8,
+      "max": 324837,
+      "mean": 112975.7
+    },
+    "listen_classify_ms": {
+      "count": 7,
+      "min": 268,
+      "median": 276,
+      "p90": 293,
+      "max": 296,
+      "mean": 280.1
+    },
+    "listen_note_ms": {
+      "count": 7,
+      "min": 518,
+      "median": 1763,
+      "p90": 2629.6,
+      "max": 2701,
+      "mean": 1658.7
+    },
+    "listen_total": {
+      "count": 8,
+      "min": 271,
+      "median": 281.5,
+      "p90": 310.9,
+      "max": 341,
+      "mean": 289.9
+    },
+    "llm_gen": {
+      "count": 8,
+      "min": 485,
+      "median": 1677.5,
+      "p90": 2579.5,
+      "max": 2660,
+      "mean": 1624
+    },
+    "llm_load": {
+      "count": 3,
+      "min": 760,
+      "median": 896,
+      "p90": 1916,
+      "max": 2171,
+      "mean": 1275.7
+    },
+    "llm_prompt_ms": {
+      "count": 8,
+      "min": 0,
+      "median": 822,
+      "p90": 1228.9,
+      "max": 1379,
+      "mean": 730
+    },
+    "llm_tok_per_s": {
+      "count": 8,
+      "min": 36.5,
+      "median": 39.2,
+      "p90": 42.3,
+      "max": 43.8,
+      "mean": 39.6
+    },
+    "llm_tokens": {
+      "count": 8,
+      "min": 17,
+      "median": 25,
+      "p90": 63.8,
+      "max": 68,
+      "mean": 33
+    },
+    "llm_ttft": {
+      "count": 8,
+      "min": 46,
+      "median": 826.5,
+      "p90": 1238,
+      "max": 1385,
+      "mean": 746.4
+    }
+  },
+  "metrics": [
+    {
+      "at": "2026-10-07T19:15:19.661Z",
+      "kind": "battery",
+      "value": 68,
+      "extra": {
+        "where": "journal_open",
+        "unit": "percent"
+      }
+    },
+    {
+      "at": "2026-10-07T19:12:21.327Z",
+      "kind": "listen_total",
+      "value": 278,
+      "extra": {
+        "source": "fixture",
+        "confident": true,
+        "windows": 5,
+        "classifyMs": 276,
+        "noteMs": 711,
+        "noteSource": "gemma"
+      }
+    },
+    {
+      "at": "2026-10-07T19:12:21.316Z",
+      "kind": "llm_gen",
+      "value": 679,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0",
+        "tokens": 26,
+        "tok_s": 41.7,
+        "prompt_tokens": 1,
+        "prompt_ms": 0,
+        "aborted": false
+      }
+    },
+    {
+      "at": "2026-10-07T19:12:21.315Z",
+      "kind": "llm_ttft",
+      "value": 46,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0"
+      }
+    },
+    {
+      "at": "2026-10-07T19:12:20.614Z",
+      "kind": "birdnet_window",
+      "value": 55,
+      "extra": {
+        "windows": 5,
+        "min": 47,
+        "max": 59,
+        "all": [
+          55,
+          55,
+          47,
+          59,
+          54
+        ]
+      }
+    },
+    {
+      "at": "2026-10-07T19:12:15.039Z",
+      "kind": "listen_total",
+      "value": 274,
+      "extra": {
+        "source": "fixture",
+        "confident": true,
+        "windows": 5,
+        "classifyMs": 272,
+        "noteMs": 518,
+        "noteSource": "gemma"
+      }
+    },
+    {
+      "at": "2026-10-07T19:12:15.026Z",
+      "kind": "llm_ttft",
+      "value": 51,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0"
+      }
+    },
+    {
+      "at": "2026-10-07T19:12:15.026Z",
+      "kind": "llm_gen",
+      "value": 485,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0",
+        "tokens": 18,
+        "tok_s": 43.8,
+        "prompt_tokens": 1,
+        "prompt_ms": 0,
+        "aborted": false
+      }
+    },
+    {
+      "at": "2026-10-07T19:12:14.519Z",
+      "kind": "birdnet_window",
+      "value": 53,
+      "extra": {
+        "windows": 5,
+        "min": 48,
+        "max": 58,
+        "all": [
+          53,
+          53,
+          48,
+          58,
+          54
+        ]
+      }
+    },
+    {
+      "at": "2026-10-07T19:12:08.345Z",
+      "kind": "listen_total",
+      "value": 284,
+      "extra": {
+        "source": "fixture",
+        "confident": true,
+        "windows": 5,
+        "classifyMs": 282,
+        "noteMs": 1907,
+        "noteSource": "gemma"
+      }
+    },
+    {
+      "at": "2026-10-07T19:12:08.334Z",
+      "kind": "llm_gen",
+      "value": 1875,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0",
+        "tokens": 18,
+        "tok_s": 38.8,
+        "prompt_tokens": 313,
+        "prompt_ms": 1378.988,
+        "aborted": false
+      }
+    },
+    {
+      "at": "2026-10-07T19:12:08.333Z",
+      "kind": "llm_ttft",
+      "value": 1385,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0"
+      }
+    },
+    {
+      "at": "2026-10-07T19:12:06.436Z",
+      "kind": "birdnet_window",
+      "value": 53,
+      "extra": {
+        "windows": 5,
+        "min": 47,
+        "max": 64,
+        "all": [
+          64,
+          53,
+          47,
+          58,
+          52
+        ]
+      }
+    },
+    {
+      "at": "2026-10-07T19:11:27.416Z",
+      "kind": "llm_load",
+      "value": 760,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0",
+        "gpu": true,
+        "reasonNoGPU": "",
+        "platform": "android"
+      }
+    },
+    {
+      "at": "2026-10-07T19:11:26.661Z",
+      "kind": "battery",
+      "value": 66,
+      "extra": {
+        "where": "app_start",
+        "unit": "percent"
+      }
+    },
+    {
+      "at": "2026-10-07T19:07:12.982Z",
+      "kind": "listen_total",
+      "value": 279,
+      "extra": {
+        "source": "mic",
+        "confident": true,
+        "windows": 5,
+        "classifyMs": 276,
+        "noteMs": 1763,
+        "noteSource": "gemma"
+      }
+    },
+    {
+      "at": "2026-10-07T19:07:12.972Z",
+      "kind": "llm_gen",
+      "value": 1732,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0",
+        "tokens": 31,
+        "tok_s": 38.4,
+        "prompt_tokens": 191,
+        "prompt_ms": 894.963,
+        "aborted": false
+      }
+    },
+    {
+      "at": "2026-10-07T19:07:12.971Z",
+      "kind": "llm_ttft",
+      "value": 899,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0"
+      }
+    },
+    {
+      "at": "2026-10-07T19:07:11.217Z",
+      "kind": "birdnet_window",
+      "value": 53,
+      "extra": {
+        "windows": 5,
+        "min": 46,
+        "max": 60,
+        "all": [
+          46,
+          60,
+          52,
+          53,
+          55
+        ]
+      }
+    },
+    {
+      "at": "2026-10-07T19:06:42.778Z",
+      "kind": "listen_total",
+      "value": 271,
+      "extra": {
+        "source": "mic",
+        "confident": true,
+        "windows": 5,
+        "classifyMs": 268,
+        "noteMs": 2582,
+        "noteSource": "template"
+      }
+    },
+    {
+      "at": "2026-10-07T19:06:42.763Z",
+      "kind": "llm_ttft",
+      "value": 819,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0"
+      }
+    },
+    {
+      "at": "2026-10-07T19:06:42.763Z",
+      "kind": "llm_gen",
+      "value": 2545,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0",
+        "tokens": 62,
+        "tok_s": 36.5,
+        "prompt_tokens": 171,
+        "prompt_ms": 814.613,
+        "aborted": false
+      }
+    },
+    {
+      "at": "2026-10-07T19:06:40.194Z",
+      "kind": "birdnet_window",
+      "value": 51,
+      "extra": {
+        "windows": 5,
+        "min": 45,
+        "max": 60,
+        "all": [
+          60,
+          45,
+          56,
+          50,
+          51
+        ]
+      }
+    },
+    {
+      "at": "2026-10-07T19:06:28.679Z",
+      "kind": "listen_total",
+      "value": 298,
+      "extra": {
+        "source": "fixture",
+        "confident": true,
+        "windows": 5,
+        "classifyMs": 296,
+        "noteMs": 2701,
+        "noteSource": "template"
+      }
+    },
+    {
+      "at": "2026-10-07T19:06:28.663Z",
+      "kind": "llm_ttft",
+      "value": 834,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0"
+      }
+    },
+    {
+      "at": "2026-10-07T19:06:28.663Z",
+      "kind": "llm_gen",
+      "value": 2660,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0",
+        "tokens": 68,
+        "tok_s": 37.8,
+        "prompt_tokens": 185,
+        "prompt_ms": 829.345,
+        "aborted": false
+      }
+    },
+    {
+      "at": "2026-10-07T19:06:25.975Z",
+      "kind": "birdnet_window",
+      "value": 55,
+      "extra": {
+        "windows": 5,
+        "min": 49,
+        "max": 69,
+        "all": [
+          52,
+          49,
+          55,
+          69,
+          58
+        ]
+      }
+    },
+    {
+      "at": "2026-10-07T19:06:14.078Z",
+      "kind": "listen_total",
+      "value": 294,
+      "extra": {
+        "source": "mic",
+        "confident": true,
+        "windows": 5,
+        "classifyMs": 291,
+        "noteMs": 1429,
+        "noteSource": "gemma"
+      }
+    },
+    {
+      "at": "2026-10-07T19:06:14.067Z",
+      "kind": "llm_ttft",
+      "value": 762,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0"
+      }
+    },
+    {
+      "at": "2026-10-07T19:06:14.067Z",
+      "kind": "llm_gen",
+      "value": 1393,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0",
+        "tokens": 24,
+        "tok_s": 39.6,
+        "prompt_tokens": 184,
+        "prompt_ms": 757.722,
+        "aborted": false
+      }
+    },
+    {
+      "at": "2026-10-07T19:06:12.647Z",
+      "kind": "birdnet_window",
+      "value": 53,
+      "extra": {
+        "windows": 5,
+        "min": 48,
+        "max": 66,
+        "all": [
+          66,
+          53,
+          48,
+          60,
+          52
+        ]
+      }
+    },
+    {
+      "at": "2026-10-07T19:05:58.599Z",
+      "kind": "llm_gen",
+      "value": 1623,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0",
+        "tokens": 17,
+        "tok_s": 40.2,
+        "prompt_tokens": 270,
+        "prompt_ms": 1164.648,
+        "aborted": false
+      }
+    },
+    {
+      "at": "2026-10-07T19:05:58.598Z",
+      "kind": "llm_ttft",
+      "value": 1175,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0"
+      }
+    },
+    {
+      "at": "2026-10-07T19:05:29.768Z",
+      "kind": "listen_total",
+      "value": 341,
+      "extra": {
+        "source": "mic",
+        "confident": false,
+        "windows": 5
+      }
+    },
+    {
+      "at": "2026-10-07T19:05:29.765Z",
+      "kind": "birdnet_window",
+      "value": 52,
+      "extra": {
+        "windows": 5,
+        "min": 38,
+        "max": 131,
+        "all": [
+          131,
+          52,
+          48,
+          38,
+          56
+        ]
+      }
+    },
+    {
+      "at": "2026-10-07T19:05:26.779Z",
+      "kind": "battery",
+      "value": 64,
+      "extra": {
+        "where": "journal_open",
+        "unit": "percent"
+      }
+    },
+    {
+      "at": "2026-10-07T19:05:15.428Z",
+      "kind": "llm_load",
+      "value": 896,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0",
+        "gpu": true,
+        "reasonNoGPU": "",
+        "platform": "android"
+      }
+    },
+    {
+      "at": "2026-10-07T19:05:14.649Z",
+      "kind": "birdnet_load",
+      "value": 132,
+      "extra": {
+        "in": "1x144000",
+        "out": "1x6522",
+        "inType": "float32",
+        "labels": 6522
+      }
+    },
+    {
+      "at": "2026-10-07T19:05:14.591Z",
+      "kind": "battery",
+      "value": 64,
+      "extra": {
+        "where": "app_start",
+        "unit": "percent"
+      }
+    },
+    {
+      "at": "2026-10-07T19:02:26.612Z",
+      "kind": "birdnet_load",
+      "value": 102,
+      "extra": {
+        "in": "1x144000",
+        "out": "1x6522",
+        "inType": "float32",
+        "labels": 6522
+      }
+    },
+    {
+      "at": "2026-10-07T19:01:56.561Z",
+      "kind": "birdnet_load",
+      "value": 113,
+      "extra": {
+        "in": "1x144000",
+        "out": "1x6522",
+        "inType": "float32",
+        "labels": 6522
+      }
+    },
+    {
+      "at": "2026-10-07T19:00:08.375Z",
+      "kind": "llm_load",
+      "value": 2171,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0",
+        "gpu": true,
+        "reasonNoGPU": "",
+        "platform": "android"
+      }
+    },
+    {
+      "at": "2026-10-07T19:00:06.411Z",
+      "kind": "birdnet_load",
+      "value": 141,
+      "extra": {
+        "in": "1x144000",
+        "out": "1x6522",
+        "inType": "float32",
+        "labels": 6522
+      }
+    },
+    {
+      "at": "2026-10-07T19:00:06.176Z",
+      "kind": "download",
+      "value": 324837,
+      "extra": {
+        "model": "gemma-3-1b-it-Q4_0",
+        "bytes": 721918496
+      }
+    },
+    {
+      "at": "2026-10-07T18:54:41.284Z",
+      "kind": "download",
+      "value": 12831,
+      "extra": {
+        "model": "birdnet-v2.4-fp16",
+        "bytes": 25932528
+      }
+    },
+    {
+      "at": "2026-10-07T18:54:28.399Z",
+      "kind": "download",
+      "value": 1259,
+      "extra": {
+        "model": "birdnet-v2.4-labels-en",
+        "bytes": 259894
+      }
+    },
+    {
+      "at": "2026-10-07T18:53:56.009Z",
+      "kind": "battery",
+      "value": 60,
+      "extra": {
+        "where": "app_start",
+        "unit": "percent"
+      }
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { GemmaTest } from './GemmaTest';
+import { MetricsPanel } from './MetricsPanel';
 import { MicTest } from './MicTest';
 import { runNativeChecks, type ModuleCheck } from '../services/nativeCheck';
 import { colors, spacing } from '../theme';
@@ -38,6 +39,7 @@ export function DiagnosticsPanel({ autoOpen = false }: { autoOpen?: boolean }) {
           ))}
           <GemmaTest />
           <MicTest />
+          <MetricsPanel />
         </View>
       )}
     </View>

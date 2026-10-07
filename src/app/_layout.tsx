@@ -7,6 +7,7 @@ import { insertMetric } from '../services/db/metrics';
 import { onDevCommand, startDevCommandPolling } from '../services/devCommands';
 import { gemmaWriter } from '../services/llm/gemmaWriter';
 import { setMetricSink } from '../services/metrics';
+import { recordBattery } from '../services/metricsExport';
 import { areRequiredModelsReady, deleteModel } from '../services/models/downloader';
 import { colors } from '../theme';
 
@@ -15,6 +16,7 @@ export default function RootLayout() {
     setMetricSink((kind, value, extra) => {
       insertMetric(kind, value, extra).catch((e) => console.warn('[metric] db insert failed', e));
     });
+    recordBattery('app_start');
     // Warm Gemma in the background so it is ready by the time the walker needs it.
     if (areRequiredModelsReady()) gemmaWriter.load().catch(() => {});
   }, []);
