@@ -22,7 +22,7 @@ MANUAL   "what did you notice?" text
 ```
 
 - App: Expo SDK 57, React Native 0.86 (New Architecture), React 19.2, TypeScript, Expo Router. Three screens: Setup, Listen, Journal.
-- All pure logic (audio windowing and resampling, WAV parsing, BirdNET post-processing, prompt building, output parsing, metrics) lives in `src/core/` with no React Native imports. It is unit tested with Jest (78 tests).
+- All pure logic (audio windowing and resampling, WAV parsing, BirdNET post-processing, prompt building, output parsing, metrics) lives in `src/core/` with no React Native imports. It is unit tested with Jest (82 tests).
 - The prompt was tuned on the actual model, using an automated comparison over 48 samples. The note's first words are prefilled (`NOTE: <species>` in listen mode), which keeps a 1B model on format and stops it inventing details. See `docs/build-log.md`.
 
 ## Measured performance
