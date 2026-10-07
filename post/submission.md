@@ -2,7 +2,7 @@
 title: "Trail Notebook: a phone that hears the birds and writes your field notes, with no signal"
 published: true
 tags: devchallenge, hf26challenge, reactnative, opensource
-cover_image: https://raw.githubusercontent.com/AttayR/trail-notebook/main/post/assets/cover.png
+cover_image: https://raw.githubusercontent.com/AttayR/trail-notebook/19439186a763e6412fe7236570a03da82f7a1a4e/post/assets/cover.png
 ---
 
 *This is a submission for the [Hacktoberfest Open-Source AI Challenge Week 1: Touch Grass](https://dev.to/challenges/hacktoberfest-week1-2026-10-05)*
@@ -26,7 +26,7 @@ Then the phone goes back in your pocket. One button, no feed, no chat box.
 
 After a one-time download at home, nothing in this loop touches the network.
 
-![Trail Notebook result card on a Galaxy S23 Ultra in airplane mode: Yellow-vented Bulbul, very likely, with a Gemma note and Next line](https://raw.githubusercontent.com/AttayR/trail-notebook/main/post/assets/s23-offline-bulbul-result.png)
+![Trail Notebook result card on a Galaxy S23 Ultra in airplane mode: Yellow-vented Bulbul, very likely, with a Gemma note and Next line](https://raw.githubusercontent.com/AttayR/trail-notebook/19439186a763e6412fe7236570a03da82f7a1a4e/post/assets/s23-offline-bulbul-result.png)
 
 *The airplane-mode test on my Samsung Galaxy S23 Ultra. The spot field said "Back garden", which is where Gemma got "the garden" from. It only used facts it was given.*
 
