@@ -1,5 +1,6 @@
 // Raw PCM capture with react-native-audio-api. Requests 48 kHz mono, reads the
 // sample rate the hardware actually delivers, and resamples to 48 kHz if needed.
+import { Platform } from 'react-native';
 import { AudioManager, AudioRecorder } from 'react-native-audio-api';
 
 import { LISTEN } from '../../config';
@@ -26,10 +27,22 @@ export interface CaptureOptions {
 
 export type MicPermission = 'granted' | 'denied' | 'undetermined';
 
+const map = (s: string): MicPermission => (s === 'Granted' ? 'granted' : s === 'Denied' ? 'denied' : 'undetermined');
+
+/**
+ * On the S23 Ultra (Android 16) `requestRecordingPermissions()` never resolved after the
+ * user tapped Allow, which hung the whole Listen flow. So the request is time-bounded
+ * and the permission is re-checked afterwards.
+ */
 export async function ensureMicPermission(): Promise<MicPermission> {
-  let s = await AudioManager.checkRecordingPermissions();
-  if (s === 'Undetermined') s = await AudioManager.requestRecordingPermissions();
-  return s === 'Granted' ? 'granted' : s === 'Denied' ? 'denied' : 'undetermined';
+  const s = await AudioManager.checkRecordingPermissions();
+  if (s !== 'Undetermined') return map(s);
+  const asked = await Promise.race([
+    AudioManager.requestRecordingPermissions(),
+    new Promise<null>((r) => setTimeout(() => r(null), 20_000)),
+  ]);
+  if (asked && asked !== 'Undetermined') return map(asked);
+  return map(await AudioManager.checkRecordingPermissions());
 }
 
 let busy = false;
@@ -44,9 +57,12 @@ export async function captureSeconds(opts: CaptureOptions = {}): Promise<Capture
     const perm = await ensureMicPermission();
     if (perm !== 'granted') throw new Error('Microphone permission not granted');
 
-    // 'measurement' turns off iOS voice processing / auto gain: we want raw ambience.
-    AudioManager.setAudioSessionOptions({ iosCategory: 'record', iosMode: 'measurement', iosOptions: [] });
-    await AudioManager.setAudioSessionActivity(true);
+    if (Platform.OS === 'ios') {
+      // 'measurement' turns off iOS voice processing / auto gain: we want raw ambience.
+      AudioManager.setAudioSessionOptions({ iosCategory: 'record', iosMode: 'measurement', iosOptions: [] });
+      await Promise.race([AudioManager.setAudioSessionActivity(true), new Promise((r) => setTimeout(r, 3000))]);
+    }
+    console.log(`[audio] permission ok, starting recorder after ${Date.now() - t0} ms`);
 
     let acc: SampleAccumulator | null = null;
     let deliveredRate = 0;
@@ -102,7 +118,7 @@ export async function captureSeconds(opts: CaptureOptions = {}): Promise<Capture
     recorder.clearOnAudioReady();
     recorder.clearOnError();
     if (recorder.isRecording()) await recorder.stop().catch(() => {});
-    await AudioManager.setAudioSessionActivity(false).catch(() => {});
+    if (Platform.OS === 'ios') await AudioManager.setAudioSessionActivity(false).catch(() => {});
     busy = false;
   }
 }

@@ -10,6 +10,8 @@ export type DevCommand =
   | { action: 'setupDownload' }
   | { action: 'testGemma' }
   | { action: 'testMic' }
+  | { action: 'listen'; source?: 'mic' | 'fixture'; spot?: string; timeoutMs?: number }
+  | { action: 'copyMetrics' }
   | { action: 'manualNote'; text: string; spot?: string; timeoutMs?: number; forceTemplate?: boolean }
   | { action: 'deleteModels' }
   | { action: 'seedEntries'; count?: number };
