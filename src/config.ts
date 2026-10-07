@@ -50,8 +50,43 @@ const LLM_VARIANTS: Record<string, ModelManifestEntry> = {
 export const ACTIVE_LLM: ModelManifestEntry =
   LLM_VARIANTS[process.env.EXPO_PUBLIC_LLM_VARIANT ?? '1b'] ?? GEMMA_1B_Q4_0;
 
-/** Models that must be present before the app leaves Setup. BirdNET is added in T9. */
-export const REQUIRED_MODELS: ModelManifestEntry[] = [ACTIVE_LLM];
+/**
+ * BirdNET V2.4 FP16 TFLite. This file is byte-identical (SHA-256 5c64ba3f...546b)
+ * to `audio-model-fp16.tflite` in the official Zenodo release
+ * (doi:10.5281/zenodo.15050749, BirdNET_v2.4_tflite_fp16.zip). It is served
+ * unzipped from the whoBIRD-TFlite mirror because the app cannot unzip.
+ */
+export const BIRDNET_MODEL: ModelManifestEntry = {
+  id: 'birdnet-v2.4-fp16',
+  kind: 'classifier',
+  displayName: 'BirdNET V2.4 bird sound model',
+  url: 'https://raw.githubusercontent.com/woheller69/whoBIRD-TFlite/master/BirdNET_GLOBAL_6K_V2.4_Model_FP16.tflite',
+  filename: 'BirdNET_GLOBAL_6K_V2.4_Model_FP16.tflite',
+  bytes: 25_932_528,
+  license: 'CC BY-NC-SA 4.0',
+  licenseUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+};
+
+/**
+ * BirdNET V2.4 English labels (6,522 lines). Byte-identical to `labels/en_uk.txt`
+ * in the official Zenodo release; served from the tphakala/BirdNET-v2.4 HF mirror.
+ */
+export const BIRDNET_LABELS: ModelManifestEntry = {
+  id: 'birdnet-v2.4-labels-en',
+  kind: 'labels',
+  displayName: 'BirdNET species names',
+  url: 'https://huggingface.co/tphakala/BirdNET-v2.4/resolve/main/labels.txt',
+  filename: 'BirdNET_GLOBAL_6K_V2.4_Labels_en.txt',
+  bytes: 259_894,
+  license: 'CC BY-NC-SA 4.0',
+  licenseUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+};
+
+/** Models that must be present before the app leaves Setup. Small files first. */
+export const REQUIRED_MODELS: ModelManifestEntry[] = [BIRDNET_LABELS, BIRDNET_MODEL, ACTIVE_LLM];
+
+/** Dev-only: a WAV placed at Documents/<this> can replace the mic (see scripts/dev-fixture.sh). */
+export const DEV_FIXTURE_FILENAME = 'dev-fixture.wav';
 
 export const MODELS_DIR_NAME = 'models';
 
@@ -70,6 +105,8 @@ export const LLM_PARAMS = {
 
 export const LISTEN = {
   seconds: 9,
+  /** BirdNET sigmoid sensitivity (BirdNET-Analyzer default 1.0). */
+  sensitivity: 1.0,
   sampleRate: 48_000,
   windowSamples: 144_000,
   hopSamples: 72_000,
