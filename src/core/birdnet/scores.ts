@@ -56,3 +56,55 @@ export function toDetections(scores: Float32Array, labels: Label[], k = 3, minSc
 export function isConfident(detections: Detection[]): boolean {
   return detections.length > 0 && detections[0].confidence >= CONFIDENCE_THRESHOLDS.likely;
 }
+
+/**
+ * BirdNET V2.4 environmental (non-bird) classes, plus a plain phrase for the UI.
+ * These never appear as alternates or in the Gemma prompt.
+ */
+export const NON_BIRD_PHRASES: Record<string, string> = {
+  Dog: 'a dog',
+  Engine: 'an engine',
+  Environmental: 'background noise',
+  Fireworks: 'fireworks',
+  Gun: 'a gunshot',
+  'Human non-vocal': 'people moving about',
+  'Human vocal': 'people talking',
+  'Human whistle': 'a human whistle',
+  Noise: 'noise',
+  'Power tools': 'power tools',
+  Siren: 'a siren',
+};
+
+export function isNonBird(label: Label | undefined): boolean {
+  return !!label && label.scientific === label.common && label.common in NON_BIRD_PHRASES;
+}
+
+export interface ListenOutcome {
+  /** Bird detections only, ranked 1..k. */
+  detections: Detection[];
+  /** Set when a non-bird class wins overall with at least "likely" confidence. */
+  nonBird: { common: string; phrase: string; confidence: number } | null;
+}
+
+/**
+ * Bird-only top-k. If a non-bird class (e.g. "Human whistle") is the overall top-1,
+ * is at least "likely", and beats the best bird, report it instead of naming a species.
+ */
+export function analyzeScores(scores: Float32Array, labels: Label[], k = 3, minScore?: number): ListenOutcome {
+  const birdScores = new Float32Array(scores);
+  let bestNonBird = -1;
+  for (let i = 0; i < scores.length; i++) {
+    if (isNonBird(labels[i])) {
+      if (bestNonBird < 0 || scores[i] > scores[bestNonBird]) bestNonBird = i;
+      birdScores[i] = 0;
+    }
+  }
+  const detections = toDetections(birdScores, labels, k, minScore);
+  const topBird = detections[0]?.confidence ?? 0;
+  const nb = bestNonBird >= 0 ? scores[bestNonBird] : 0;
+  const nonBird =
+    bestNonBird >= 0 && nb >= CONFIDENCE_THRESHOLDS.likely && nb > topBird
+      ? { common: labels[bestNonBird].common, phrase: NON_BIRD_PHRASES[labels[bestNonBird].common], confidence: nb }
+      : null;
+  return { detections: nonBird ? [] : detections, nonBird };
+}

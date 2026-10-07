@@ -5,7 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { useCallback, useRef, useState } from 'react';
 
 import { LISTEN, LLM_PARAMS } from '../config';
-import { isConfident, toDetections } from '../core/birdnet/scores';
+import { analyzeScores, isConfident } from '../core/birdnet/scores';
 import { startOfLocalDay } from '../core/context/time';
 import { listenPrefill } from '../core/llm/gemmaFormat';
 import { buildListenPrompt, buildManualPrompt, manualPrefill, sanitizeInput } from '../core/llm/prompt';
@@ -47,6 +47,8 @@ export interface ObservationState {
   error: string | null;
   elapsedMs: number | null;
   offline: boolean | null;
+  /** Plain phrase when a non-bird sound won, e.g. "a human whistle". */
+  nonBird: string | null;
 }
 
 export interface RunOptions {
@@ -71,6 +73,7 @@ const IDLE: ObservationState = {
   error: null,
   elapsedMs: null,
   offline: null,
+  nonBird: null,
 };
 
 const failingWriter: NoteWriter = {
@@ -224,13 +227,14 @@ export function useObservation() {
 
         patch({ phase: 'classifying' });
         const res = await birdnet.classify(samples);
-        const detections = toDetections(res.scores, birdnet.labels(), LISTEN.topK);
+        const { detections, nonBird } = analyzeScores(res.scores, birdnet.labels(), LISTEN.topK);
         const tClassified = Date.now();
         const tapToSpeciesMs = tClassified - tCaptured;
         console.log(
           `[listen] ${res.windows} windows in ${res.totalMs}ms; top: ${detections.map((d) => `${d.common} ${d.confidence.toFixed(3)}`).join(', ') || 'none'}`,
         );
-        patch({ detections });
+        patch({ detections, nonBird: nonBird?.phrase ?? null });
+        if (nonBird) console.log(`[listen] non-bird top-1: ${nonBird.common} ${nonBird.confidence.toFixed(3)}`);
 
         const [loc, offline] = await ctxPromise;
         patch({ offline });

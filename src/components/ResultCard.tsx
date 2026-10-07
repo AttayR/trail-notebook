@@ -32,9 +32,13 @@ export function ResultCard({ state, onDismiss, onTellInstead }: Props) {
       ) : null}
       {state.phase === 'nothing' ? (
         <View style={styles.nothing}>
-          <Text style={styles.nothingTitle}>Nothing clear.</Text>
-          <Text style={styles.body}>Try again closer, or tell me what you noticed.</Text>
-          {state.detections.length ? (
+          <Text style={styles.nothingTitle}>{state.nonBird ? "Didn't catch a bird." : 'Nothing clear.'}</Text>
+          <Text style={styles.body}>
+            {state.nonBird
+              ? `It sounded like ${state.nonBird}. Try again when it is quieter, or tell me what you noticed.`
+              : 'Try again closer, or tell me what you noticed.'}
+          </Text>
+          {state.detections.length && !state.nonBird ? (
             <Text style={styles.muted}>
               Faint guesses: {state.detections.map((d) => d.common).join(', ')}
             </Text>

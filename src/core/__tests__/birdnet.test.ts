@@ -1,5 +1,5 @@
 import { assertLabelCount, BIRDNET_V24_LABEL_COUNT, parseLabelLine, parseLabels } from '../birdnet/labels';
-import { confidenceWord, isConfident, maxOverWindows, sigmoid, toDetections, topK } from '../birdnet/scores';
+import { analyzeScores, confidenceWord, isConfident, isNonBird, maxOverWindows, sigmoid, toDetections, topK } from '../birdnet/scores';
 
 describe('labels', () => {
   it('splits "Scientific_Common"', () => {
@@ -54,5 +54,34 @@ describe('scores', () => {
   });
   it('confidence words at boundaries', () => {
     expect([0.8, 0.5, 0.15, 0.1].map(confidenceWord)).toEqual(['very likely', 'likely', 'possible', null]);
+  });
+});
+
+describe('non-bird classes', () => {
+  const labels = [
+    { scientific: 'Pycnonotus xanthopygos', common: 'White-spectacled Bulbul' },
+    { scientific: 'Human whistle', common: 'Human whistle' },
+    { scientific: 'Eudynamys scolopaceus', common: 'Asian Koel' },
+    { scientific: 'Engine', common: 'Engine' },
+    { scientific: 'Gryllus assimilis', common: 'Gryllus assimilis' }, // a cricket species, not filtered
+  ];
+  it('recognises environmental labels only', () => {
+    expect(labels.map(isNonBird)).toEqual([false, true, false, true, false]);
+  });
+  it('drops non-bird classes from the alternates', () => {
+    const r = analyzeScores(new Float32Array([0.9, 0.3, 0.2, 0.25, 0.1]), labels);
+    expect(r.nonBird).toBeNull();
+    expect(r.detections.map((d) => d.common)).toEqual(['White-spectacled Bulbul', 'Asian Koel']);
+    expect(r.detections.map((d) => d.rank)).toEqual([1, 2]);
+  });
+  it('reports a winning non-bird class instead of naming a species', () => {
+    const r = analyzeScores(new Float32Array([0.3, 0.7, 0.2, 0.1, 0]), labels);
+    expect(r.detections).toEqual([]);
+    expect(r.nonBird).toMatchObject({ common: 'Human whistle', phrase: 'a human whistle' });
+  });
+  it('ignores a weak non-bird top-1 (below likely) and keeps bird guesses', () => {
+    const r = analyzeScores(new Float32Array([0.3, 0.45, 0, 0, 0]), labels);
+    expect(r.nonBird).toBeNull();
+    expect(r.detections[0].common).toBe('White-spectacled Bulbul');
   });
 });
