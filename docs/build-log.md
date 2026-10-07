@@ -114,3 +114,71 @@ Android: not built yet (the emulator path is still open; iOS simulator was enoug
 - Verified on the iPhone 17 simulator (the input is the Mac's microphone): **432,000 samples at 48 kHz, device delivered 48,000 Hz natively** (no resampling), 90 chunks of 4,800 frames, peak level 0.59, non-zero signal (`docs/screens/t10-mic-result.png`).
 - Observation: the call took 12.5 s for a 9 s capture, so about 3.5 s goes to permission check, session activation and recorder start on the simulator. Measure this on a phone. If it is similar, pre-activate the audio session when Listen mounts so the countdown starts immediately.
 - Must re-check on a real phone: delivered sample rate (many Android devices give 44.1 or 48 kHz), level with the phone held up outdoors, and the start-up latency above.
+
+---
+# Thursday 2026-10-08 (continued overnight)
+
+## Primary test device: Samsung Galaxy S23 Ultra (flagship)
+`adb -s R5CW902N0BB`: `ro.product.model=SM-S918B`, Android 16 (SDK 36), SoC `SM8550` (Snapdragon 8 Gen 2), arm64-v8a, MemTotal 11,309,736 kB (expo-device reports 10.8 GB), 226 GB free. **This is a flagship. Every phone number below is labelled "S23 Ultra (flagship)" and must not be presented as mid-range performance.** Only our package (`com.hf26.trailnotebook`) was installed or touched.
+
+## T9 BirdNET spike: PASS on react-native-fast-tflite (no ONNX fallback needed, about 40 min)
+- **Model source:** `BirdNET_GLOBAL_6K_V2.4_Model_FP16.tflite` from the whoBIRD-TFlite GitHub mirror, **25,932,528 bytes**. Its SHA-256 `5c64ba3f...546b` is **identical** to `audio-model-fp16.tflite` inside the official Zenodo `BirdNET_v2.4_tflite_fp16.zip` (doi:10.5281/zenodo.15050749). The mirror is used only because it serves the file unzipped.
+- **Labels:** the HF mirror `tphakala/BirdNET-v2.4/labels.txt` (259,894 bytes) is byte-identical to Zenodo `labels/en_uk.txt`, with 6,522 lines. whoBIRD's own `labels_en.txt` differs from Zenodo in one line (3214), so I did not use it.
+- **License note:** Zenodo's API reports `cc-by-nc-4.0`; the GitHub, HF and whoBIRD pages say CC BY-NC-SA 4.0. We follow the stricter NC-SA.
+- **Test clip:** BirdNET-Analyzer's `example/soundscape.wav` (120 s, 48 kHz mono int16; license not stated, so it is fetched by `scripts/dev-fixture.sh` into gitignored `models-cache/` and never committed). Seconds 0-9 are the fixture.
+- **Ground truth:** a Python reference with `ai-edge-litert` (LiteRT) on the host, using the same windowing (5 x 3 s, 1.5 s hop, max of sigmoid): **Black-capped Chickadee 0.815**, Tufted Titmouse 0.247, American Tree Sparrow 0.234. The 120 s non-overlapping pass found Black-capped Chickadee, House Finch and Dark-eyed Junco, which match the Analyzer's documented example species. Host CPU: 29 ms per window.
+- **Tensors via fast-tflite:** input `1x144000 float32`, output `1x6522`. Loaded from `file://` with the CPU delegate.
+- **BUG found and fixed:** the first in-app result was "Tufted Titmouse 0.187", which did not match the reference. Per-window argmax logging showed the logits were **identical to Python** (window 0 argmax 4771 = chickadee, logit 1.482). The bug was ours: `react-native-fast-tflite` is zero-copy and **reuses its output ArrayBuffer on every `run()`**, so `new Float32Array(out)` (a view) for each window ended up pointing at the last window's scores. Fix: `new Float32Array(out.slice(0))`. After the fix the app reproduces the reference exactly (0.815 / 0.247 / 0.234) on iOS and Android.
+- **Latency:**
+  - iOS Simulator (Mac): load 70 ms, 5 windows 158-212 ms (about 30 ms per window).
+  - **S23 Ultra (flagship):** load 102-141 ms (median 122 ms), **53 ms median per 3 s window** (p90 60 ms, n=40), 5 windows in 268-296 ms.
+
+## T11 Listen flow end to end
+- `hooks/useObservation.ts` replaces `useManualNote`: one state machine for manual and listen. Listen runs capture (mic, or `__DEV__` fixture via `{"action":"listen","source":"fixture"}`), then haptic, then BirdNET, then top-3 detections. If the top score is below 0.5 it shows the "Nothing clear" card with the faint guesses and a "Tell it instead" link, and saves nothing. Otherwise it runs Gemma with the detections prompt and "already logged today", then saves the entry with its detections. Location and network state are looked up while listening.
+- `ListenButton` now shows the countdown seconds, with the mic level as ring thickness, plus a progress bar.
+- Offline stamp (architecture N2, pulled forward because it proves the offline claim): `expo-network` state is saved per entry and shown as "offline" in the card and Journal.
+- New native modules (rebuilt both platforms): expo-haptics, expo-battery, expo-clipboard, expo-device, expo-network (all `~57.0.x`).
+- **Bug (S23 Ultra):** the first real mic tap hung forever at 0%. On Android, `AudioManager.requestRecordingPermissions()` never resolved after the user tapped Allow (the permission shows `granted=true, USER_SET`), and `setAudioSessionActivity` is iOS-only anyway. Fix: the permission request is bounded at 20 s and re-checked afterwards; session calls are iOS-only and bounded at 3 s.
+- Note: several mic runs in the logs were started by a person tapping Listen on the phone, not by the app. Logcat attribution confirmed nothing fires on its own.
+- **Mic on S23 Ultra (flagship):** delivers **48,000 Hz natively** (no resampling), 90 x 4,800-frame buffers, 432,000 samples, peak level 0.63 indoors. 9 s capture in 9,179 ms, so about 180 ms start-up (the iOS simulator needed about 3.5 s).
+- Verified: iOS Simulator fixture run gives chickadee card + Gemma note + saved (`docs/screens/t11-ios-listen-fixture-result.png`). S23 Ultra fixture runs give the same species and a Gemma note in 0.9-2.3 s after classification (`docs/screens/android/a4-listen-fixture-result.png`).
+- Not yet done: a real bird through the phone mic outdoors (field test).
+
+## T12 Metrics capture + export
+- `core/metrics/summary.ts` (pure, tested) aggregates per kind (count, min, median, p90, max, mean), plus tok/s, prompt ms, per-window BirdNET ms, and classify/note ms from extras. `services/metricsExport.ts` builds the JSON: device (expo-device), model files with on-disk bytes, summary and raw rows. It is copied to the clipboard (expo-clipboard) and written to `Documents/metrics-export.json`, so a dev machine can pull it with `adb exec-out run-as ... cat files/metrics-export.json`. Battery level (expo-battery) is recorded at app start and on Journal open. The Diagnostics `MetricsPanel` shows the key numbers and a "Copy metrics JSON" button.
+- First export from the S23 Ultra: `docs/metrics/s23ultra-dev-2026-10-08.json` (debug build, phone on USB power). **S23 Ultra (flagship) numbers:**
+  - In-app download over home Wi-Fi: labels 1.3 s, BirdNET 12.8 s, Gemma **324.8 s** (722 MB, about 2.2 MB/s).
+  - Gemma load 760-2,171 ms (median 896 ms; the first cold load was 2.17 s). `gpu: true` was reported even with `n_gpu_layers 0` on Android; check whether OpenCL is engaged.
+  - Gemma prompt eval: 185-313 tokens in 0.8-1.4 s. TTFT median 827 ms (46 ms on a prompt-cache hit). **Decode 39.2 tok/s median** (36.5-43.8). Note generation 0.5-2.7 s.
+  - BirdNET as above. Tap-to-species after capture: **282 ms median**.
+  - Battery is not meaningful yet (it rose 60 to 68% while charging over USB). Needs an unplugged field session.
+
+## Prompt tuning (Gemma 3 1B Q4_0)
+Method: a scratch "prompt lab" bundles the real `src/core` prompt builders with esbuild and runs them through host llama.cpp (`brew install llama.cpp`, 0.6.0) with the same GGUF and the app's sampling (temp 0.4, top_p 0.9, n_predict 120, `NOTE:` prefill). There are 6 fixed cases (3 manual, 3 listen with the fixture's real detections), 4-8 seeds each, scored automatically: format OK, instruction echo, example copied, species named (listen cases), and invented setting words (oak, tree, nest, feather, soil, leaves, weather...).
+
+| Variant | Samples | Format OK | Species named | Invented setting | Example copied |
+|---|---|---|---|---|---|
+| v0 (original prompt) | 24 | 17 | 12/12 | **11** | 0 |
+| v1 vivid "one concrete detail" + example | 12 (eyeballed) | 12 | 6/6 | ~6 (oak tree, branch, nesting, feather) | 0 |
+| v2 grounding rules + facts-to-output example | 24 | 23 | 11/12 | 1 | 0 |
+| v5/v6 grounding, no example | 24 each | 24 | 3-4/12 | 0 | 0 |
+| v2 + listen prefill `NOTE: <top species>` | 48 | 48 | 24/24 | 0 | 1 |
+| **v9 shipped** = v2, place removed from example + species prefill | 48 | **48** | **24/24** | **1** | **0** |
+
+Before (v0), same 3 listen cases:
+- "The Black-capped Chickadee was identified as a very likely species of bird. Tufted Titmouse and American Tree Sparrow are possible, but less probable based on the sound." / Next: "Listen for the distinct, high-pitched chirping of a Black-capped Chickadee."
+- "The Dark-eyed Junco was identified as a very likely bird, possibly a Dark-eyed Junco. House Finches are also possible, though less probable given the time of day." / Next: "Look for movement in the oak trees." (invented oak trees)
+- "The birdNET identified a House Finch, likely, was heard at 12:15 PM in the back garden. It's likely a common resident of this area." / Next: "Look for signs of activity – perhaps a flurry of feathers or a quick hop."
+
+After (v9 + species prefill), same cases:
+- "Black-capped Chickadee was heard, close by." / Next: "Walk slowly along the trail."
+- "Dark-eyed Junco was heard, chirping steadily." / Next: "Walk to the edge of the field, carefully observing."
+- "House Finch is nearby, moving quickly." / Next: "Walk slowly towards the house."
+
+On the S23 Ultra after the change: "Black-capped Chickadee is heard, a sharp, insistent call." / "...close by." / "...loud and insistent." All three were `note_source=gemma`.
+
+Honest read: the tuned notes are much more **grounded and consistently formatted**: inventions dropped from 11/24 to 1/48, and the format holds every time. They are only **modestly more vivid**: shorter, present tense, sometimes a sound detail ("sharp, insistent call"), but often plain. Pushing for vividness (v1) made a 1B model invent trees and nests. For a field notebook that claims "only what you heard", we chose grounded over florid.
+Other fixes found while tuning:
+1. The 1B model sometimes continues the prefilled `NOTE:` with the bracketed placeholder text. The parser now strips echoed placeholders and returns null (so the template is used) when nothing real remains.
+2. With a place name in the style example, the S23 Ultra copied "reservoir path" into NEXT 3 of 3 times. The place was removed from the example, and `finalizeNote` now rejects lines that use example-only words (wren/reservoir) unless the facts contain them.
+3. Listen mode prefills the species name, which eliminated the echo failure that hit the chickadee case twice on the phone.

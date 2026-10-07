@@ -11,6 +11,8 @@ export interface WriteNoteOptions {
   onTimeout?: (template: NoteResult) => void;
   timeoutMs: number;
   signal?: AbortSignal;
+  /** Start of the model turn, e.g. "NOTE: Black-capped Chickadee" (default "NOTE:"). */
+  prefill?: string;
 }
 
 export async function writeNoteWithFallback(
@@ -26,9 +28,11 @@ export async function writeNoteWithFallback(
     opts.onTimeout?.(template);
   }, opts.timeoutMs);
   try {
-    const res = await writer.write(messages, (acc) => opts.onToken?.(acc), opts.signal);
+    const res = await writer.write(messages, (acc) => opts.onToken?.(acc), opts.signal, opts.prefill);
     if (res.aborted && !res.text.trim()) return template;
-    return finalizeNote(res.text, fallback);
+    // Facts = the prompt minus its fixed instructions, so a real "wren" sighting is not rejected.
+    const facts = messages.map((m) => m.content.split('Facts:')[1]?.split('Reply with')[0] ?? '').join(' ');
+    return finalizeNote(res.text, fallback, facts);
   } catch (e) {
     console.warn('[llm] write failed, using template', e);
     return template;

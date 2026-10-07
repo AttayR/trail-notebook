@@ -17,6 +17,12 @@ export interface NoteWriter {
   getError(): string | null;
   subscribe(listener: (s: WriterState) => void): () => void;
   load(): Promise<void>;
-  write(messages: ChatMessage[], onToken: (accumulated: string) => void, signal?: AbortSignal): Promise<WriteResult>;
+  /** `prefill` starts the model turn (default "NOTE:"); it is included in the returned text. */
+  write(
+    messages: ChatMessage[],
+    onToken: (accumulated: string) => void,
+    signal?: AbortSignal,
+    prefill?: string,
+  ): Promise<WriteResult>;
   release(): Promise<void>;
 }

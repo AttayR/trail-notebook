@@ -82,6 +82,7 @@ class GemmaWriter implements NoteWriter {
     messages: ChatMessage[],
     onToken: (accumulated: string) => void,
     signal?: AbortSignal,
+    prefill: string = NOTE_PREFILL,
   ): Promise<WriteResult> {
     await this.load();
     const ctx = this.ctx;
@@ -92,8 +93,8 @@ class GemmaWriter implements NoteWriter {
     const start = Date.now();
     let firstAt: number | null = null;
     // Manual Gemma template with the model turn prefilled with "NOTE:".
-    const prompt = toGemmaPrompt(messages, NOTE_PREFILL);
-    let acc = NOTE_PREFILL;
+    const prompt = toGemmaPrompt(messages, prefill);
+    let acc = prefill;
     let aborted = false;
     const onAbort = () => {
       aborted = true;
@@ -129,7 +130,7 @@ class GemmaWriter implements NoteWriter {
         prompt_ms: res.timings?.prompt_ms,
         aborted,
       });
-      return { text: res.text != null ? NOTE_PREFILL + res.text : acc, tokens, ttftMs, totalMs, tokPerSec, aborted };
+      return { text: res.text != null ? prefill + res.text : acc, tokens, ttftMs, totalMs, tokPerSec, aborted };
     } finally {
       signal?.removeEventListener('abort', onAbort);
       this.busy = false;

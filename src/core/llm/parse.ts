@@ -5,8 +5,9 @@ const STOP_TOKENS = /<end_of_turn>|<eos>|<start_of_turn>(model|user)?/gi;
 
 // Instruction text a small model may echo back; removed before use.
 const ECHO = [
-  /\(?one or two (calm )?sentences( for the journal)?( about what was noticed)?\)?\.?/gi,
+  /\(?one or two (calm |short )?sentences[^)\n]*\)?\.?/gi,
   /\(?one short thing to look or listen for[^.)\n]*\)?\.?/gi,
+  /\(?one thing to do in the next few minutes[^)\n]*\)?\.?/gi,
 ];
 
 function stripEcho(s: string): string {
@@ -16,6 +17,7 @@ function stripEcho(s: string): string {
 function clean(s: string): string {
   return s
     .replace(/\*\*|__|`/g, '')
+    .replace(/^\s*\(([^()]*)\)\.?\s*$/, '$1')
     .replace(/^[\s\-*>#:]+/, '')
     .replace(/\s+/g, ' ')
     .trim();
@@ -55,15 +57,25 @@ export function parseNote(raw: string): ParsedNote | null {
   if (!note) {
     // No NOTE label: use whatever prose appears before NEXT (or all of it).
     const before = nextMatch ? text.slice(0, nextMatch.index) : text;
-    note = clean(firstSentences(stripEcho(before).replace(/\n+/g, ' ')));
+    note = clean(firstSentences(stripEcho(before).replace(/^\W*note\W*:/i, '').replace(/\n+/g, ' ')));
   }
   if (!note) return null;
   return { note, next };
 }
 
-/** Combine a parse with a deterministic fallback. Missing NEXT is filled from the fallback. */
-export function finalizeNote(raw: string, fallback: ParsedNote): NoteResult {
+/** Words that only appear in the prompt's style example; seeing them means the model copied it. */
+const EXAMPLE_ONLY = /\b(wren|reservoir)\b/i;
+
+/**
+ * Combine a parse with a deterministic fallback. Missing NEXT is filled from the fallback.
+ * Lines that copy the style example (unless the facts themselves mention those words)
+ * are replaced by the fallback.
+ */
+export function finalizeNote(raw: string, fallback: ParsedNote, facts = ''): NoteResult {
   const parsed = parseNote(raw);
   if (!parsed) return { ...fallback, source: 'template', raw };
-  return { note: parsed.note, next: parsed.next || fallback.next, source: 'gemma', raw };
+  const copied = (t: string) => EXAMPLE_ONLY.test(t) && !EXAMPLE_ONLY.test(facts);
+  if (copied(parsed.note)) return { ...fallback, source: 'template', raw };
+  const next = parsed.next && !copied(parsed.next) ? parsed.next : fallback.next;
+  return { note: parsed.note, next, source: 'gemma', raw };
 }

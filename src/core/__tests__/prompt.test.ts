@@ -59,6 +59,6 @@ describe('buildManualPrompt', () => {
   });
   it('omits place when no spot name', () => {
     const [m] = buildManualPrompt('crows', { date: ctx.date });
-    expect(m.content).not.toContain('Place:');
+    expect(m.content).not.toContain('- Place:');
   });
 });

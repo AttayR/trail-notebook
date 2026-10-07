@@ -86,3 +86,30 @@ describe('real 1B outputs (simulator, 2026-10-07)', () => {
     expect(parseNote(raw)).toEqual({ note: 'Crows overhead.', next: 'Watch the oak.' });
   });
 });
+
+describe('echo of the tuned placeholders', () => {
+  it('drops a NOTE that only echoes the instruction', () => {
+    expect(parseNote('NOTE: one or two short sentences, under 30 words\nNEXT: Walk slowly along the trail.')).toBeNull();
+    expect(parseNote('NOTE: (one or two short sentences, at most 30 words) A junco trills.\nNEXT: Wait.')).toEqual({
+      note: 'A junco trills.',
+      next: 'Wait.',
+    });
+  });
+});
+
+describe('example-copy guard', () => {
+  const fb = { note: 'fb note', next: 'fb next' };
+  it('replaces a NEXT that copies the style example', () => {
+    expect(finalizeNote('NOTE: A chickadee calls.\nNEXT: Walk to the edge of the reservoir path.', fb)).toMatchObject({
+      note: 'A chickadee calls.',
+      next: 'fb next',
+      source: 'gemma',
+    });
+  });
+  it('falls back entirely when the NOTE copies the example', () => {
+    expect(finalizeNote('NOTE: A wren sings in the evening.\nNEXT: Wait.', fb).source).toBe('template');
+  });
+  it('allows the words when the facts contain them', () => {
+    expect(finalizeNote('NOTE: A wren sings.\nNEXT: Wait.', fb, '- Heard: Eurasian Wren (likely)').source).toBe('gemma');
+  });
+});
