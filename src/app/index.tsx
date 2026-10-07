@@ -1,10 +1,14 @@
-import { Link } from 'expo-router';
+import { Link, Redirect } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { areRequiredModelsReady } from '../services/models/downloader';
 import { colors, spacing } from '../theme';
 
 export default function ListenScreen() {
+  const [ready] = useState(areRequiredModelsReady);
+  if (!ready) return <Redirect href="/setup" />;
   return (
     <SafeAreaView style={styles.root}>
       <View style={styles.center}>
