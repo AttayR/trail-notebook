@@ -67,13 +67,6 @@ export const LLM_PARAMS = {
   timeoutMs: 30_000,
 };
 
-export const MANUAL_INPUT_MAX_CHARS = 200;
-
-export const CONFIDENCE = {
-  veryLikely: 0.8,
-  likely: 0.5,
-  possible: 0.15,
-};
 
 export const LISTEN = {
   seconds: 9,
