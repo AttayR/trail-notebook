@@ -47,7 +47,7 @@ fits the RN skill set, can be field-tested this week for the bonus.
 - [~] Offline journal storage (SQLite) + simple map/log — SQLite journal done; no map (cut per architecture)
 - [x] README with license notes, setup, model download steps (T13) + MIT LICENSE excluding weights
 - [x] Metrics capture + JSON export (T12)
-- [~] Release builds (T14) — see build-log
+- [~] Release builds (T14) — Android release APK built (134 MB, arm64, no weights); install + instrumented offline run on phone and iOS Release build pending (offline flow user-reported on S23 Ultra)
 - [ ] 👤 Create public GitHub repo (Claude prepares; user approves push)
 
 ## Phase 4 — QA + Field test (Fri evening–Sat) · agent: `qa-tester`

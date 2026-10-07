@@ -195,3 +195,20 @@ Other fixes found while tuning:
 - BirdNET V2.4 has 11 environmental classes whose scientific name equals the common name: Dog, Engine, Environmental, Fireworks, Gun, Human non-vocal, Human vocal, Human whistle, Noise, Power tools, Siren. (Two crickets, *Gryllus assimilis* and *Miogryllus saussurei*, follow the same naming pattern but are real species and are kept.)
 - `core/birdnet/scores.ts` `analyzeScores()`: these classes are removed from the ranked alternates and therefore from the Gemma prompt. If one of them is the overall top-1, is at least "likely" (0.5) and beats the best bird, the card says "Didn't catch a bird. It sounded like a human whistle..." and no species is named or saved. 4 new unit tests.
 - Device check (iOS Simulator, synthetic 1.2-2.4 kHz gliding tones as the fixture): BirdNET top-1 was `Siren 0.847`, so the non-bird path triggered and no bird was named (verified from logs; no screenshot because the shared simulator was showing another app at that moment).
+
+## T14 Release build
+- Android ABIs restricted to arm64-v8a with `expo-build-properties` `android.buildArchs` (llama.rn ships only arm64-v8a/x86_64, so the 32-bit slices were wasted build time and size). The first release build without this was compiling armeabi-v7a and x86 too, so I stopped it.
+- `cd android && ./gradlew assembleRelease`: **BUILD SUCCESSFUL in 2 min 37 s** (warm Gradle cache).
+- **APK:** `android/app/build/outputs/apk/release/app-release.apk`, **134,017,517 bytes (134 MB)**, SHA-256 prefix `3d4d3a34073ee8a9`. Only `lib/arm64-v8a` (43 .so files). **No model weights inside** (0 `.gguf`/`.tflite`/`.onnx` entries).
+- Size is over the 80 MB architecture budget. The cause is llama.rn bundling about 7 CPU-feature variants of `librnllama` (v8, v8_2_dotprod, i8mm, dotprod_i8mm, hexagon_opencl, ...), about 10-12 MB each, chosen at runtime. Plus 24 MB of dex. Possible later fixes: an AAB with ABI splits (Play would serve only arm64), or stripping the unused llama.rn variants (risky; not done).
+- Signing: the Expo-generated project signs release builds with the template **debug keystore** (`android/app/debug.keystore`, inside gitignored `/android`; `*.jks`/`*.keystore` are also ignored). It is fine for sideloading the demo; a store build needs a private keystore.
+- **Not done (phone disconnected by the user before this step):** installing the release APK on the S23 Ultra and the instrumented wifi/data-off run via adb. The offline flow on the S23 Ultra is **user-reported** (airplane mode: Yellow-vented Bulbul identified, Gemma note in about 3-4 s, 11.3 s total including the 9 s capture; see `docs/user-device-notes.md`). It was done with the debug build, whose JS comes from Metro over USB/LAN, while models and inference were local.
+- **Not done:** iOS Release simulator build (skipped to finish today), and the Android emulator lower-end comparison.
+
+## Captured S23 Ultra (flagship) metrics, instrumented
+From `docs/metrics/s23ultra-dev-2026-10-08.json` and logcat (debug build, USB power):
+- BirdNET load 122 ms median; 53 ms median per 3 s window (p90 60, n=40); tap-to-species after capture 282 ms median.
+- Gemma load 0.9 s median (2.17 s first cold); TTFT 827 ms median; decode 39.2 tok/s median (36.5-43.8; one cold run at 19.4); note 0.5-2.7 s.
+- Mic: 48 kHz native, 9 s capture in 9.18 s.
+- Downloads over home Wi-Fi: Gemma 722 MB in 324.8 s; BirdNET 25.9 MB in 12.8 s.
+User-reported (not instrumented): note in about 3-4 s; 11.3 s from tap to result including the 9 s of listening; works in airplane mode.
