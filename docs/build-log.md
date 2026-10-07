@@ -46,3 +46,36 @@ Screens: `docs/screens/t2-first-launch.png`, `docs/screens/t2-native-modules.png
 Simulator automation problem: the simulator runs headless here (no Simulator.app GUI, no idb/cliclick), and every `simctl openurl` for a custom scheme triggers an "Open in Trail Notebook?" system dialog that cannot be dismissed from the CLI. Fix: a `__DEV__`-only command channel (`src/services/devCommands.ts`). `scripts/dev-cmd.sh '<json>'` writes `dev-command.json` into the app's Documents dir through `xcrun simctl get_app_container`, and the app polls for it every second (navigate, start download, test Gemma, manual note, delete models). It is inert in release builds. `scripts/sim-shot.sh <name>` saves screenshots to `docs/screens/`. `xcrun simctl launch` reconnects the dev client to Metro with no dialog.
 
 Android: not built yet (the emulator path is still open; iOS simulator was enough to clear the T2 native risk).
+
+## T3 Core part 1
+- `src/core/`: `types.ts`, `context/time.ts` (part of day, hemisphere-aware season, clock), `birdnet/confidence.ts` (0.8 / 0.5 / 0.15 thresholds as words), `llm/prompt.ts`, `llm/parse.ts`, `llm/template.ts`, `util/id.ts`. Pure TypeScript, no RN imports.
+- Decision: confidence thresholds live in core (not `config.ts`) so core stays dependency-free.
+- The manual input is sanitised before it enters the prompt: newlines collapsed, double quotes swapped for single quotes, capped at 200 chars. This keeps the facts block well-formed.
+- 40 tests passed on the first run.
+
+## T4 Model downloader + Setup
+- SDK 57 `expo-file-system` (new object API): `File.downloadFileAsync(url, destFile, { idempotent, onProgress, signal })` downloads to a temp file and moves it into place only on success. `File.createDownloadTask` (pause/resume) also exists; not needed yet.
+- Integrity check: exact byte size from the manifest, plus a free-space check (needs 1.1x the model size).
+- Problem: the first in-app download was silently aborted. Fast Refresh remounted the Setup screen, and the hook's unmount cleanup called `abort()`. A real user navigating away would hit the same bug. Fix: `services/models/downloadManager.ts` holds module-level download state; screens subscribe with `useSyncExternalStore`, and nothing aborts on unmount.
+- Verified on the simulator:
+  - Progress bar while downloading (`docs/screens/t4-setup-downloading.png`).
+  - Full in-app download of `gemma-3-1b-it-Q4_0.gguf`: 721,918,496 bytes in **362.6 s** (about 2 MB/s on this connection). The SHA-256 of the downloaded file is `27ee88e0...b0276e`, which matches the Hugging Face `x-linked-etag`.
+  - Setup routes to Listen on completion (`t4-after-download-listen.png`). Kill and relaunch goes straight to Listen (`t4-relaunch-skips-setup.png`). Moving the file away and relaunching returns to Setup (`t4-missing-file-back-to-setup.png`).
+- `scripts/fetch-models.sh [--sim] [--270m]` downloads to `models-cache/` (gitignored) and can copy into the simulator container. The README documents the download steps and licenses.
+
+## T5 Gemma service
+- `services/llm/gemmaWriter.ts` implements the `NoteWriter` interface over llama.rn: background `initLlama` (n_ctx 1024, `n_gpu_layers` 99 on iOS with an automatic CPU retry if GPU init fails), streamed completion, abort via `stopCompletion`, and metrics for `llm_load`, `llm_ttft` and `llm_gen` (tokens, tok/s, prompt tokens). `services/llm/writeNote.ts` adds the 30 s soft timeout: the template note is shown and saved, and Gemma's text replaces it if Gemma finishes.
+- The metric sink writes to the SQLite `metrics` table and prints `[metric]` console lines.
+- Simulator numbers (iPhone 17 sim on an Apple-silicon Mac; NOT representative of a phone): model load 371-408 ms with `gpu: true` (Metal works in this simulator, contrary to the research note). Prompt eval about 55 tok/s (142-token prompt: TTFT 2.6 s). Decode 39-45 tok/s. A 20-36 token note takes 2-3.5 s. A repeat prompt hits llama.rn's prompt cache (TTFT 35 ms).
+- **Problem: first real output ignored the format.** Gemma 3 1B echoed the instruction ("NOTE: one or two sentences.") and put the nudge in an unlabeled last paragraph. Fixes:
+  1. Apply the Gemma chat template by hand (`core/llm/gemmaFormat.ts`) and **prefill the model turn with `NOTE:`**, using llama.rn `prompt` instead of `messages`.
+  2. Rewrite the instruction placeholders in parentheses.
+  3. The parser strips echoed instruction text and treats a trailing paragraph as NEXT when the label is missing. A regression test uses the real output.
+  After the fix, 3 of 3 runs returned clean `NOTE:` / `NEXT:` lines (`docs/screens/t5-test-gemma.png`). Example: "NOTE: A small brown bird was observed hopping beneath the hedge. / NEXT: Listen for a short rising whistle." The notes are short and somewhat literal. Prompt wording is worth iterating for the write-up (writing quality matters).
+- Airplane mode: the simulator shares the Mac's network and cannot toggle airplane mode. Inference never touches the network (the model loads from a local `file://`), but the airplane-mode proof must be done on a real phone.
+
+## T6 SQLite + Journal
+- `services/db/schema.ts`: lazy singleton `openDatabaseAsync('trail.db')`, `PRAGMA foreign_keys = ON`, WAL, and `PRAGMA user_version` migrations (v1 = entries, detections, metrics + indexes from architecture 4.1). `services/db/entries.ts`: insert (transaction incl. detections), update note, list newest first with detections joined, and `speciesSince` for the "already logged today" prompt line.
+- Row-to-domain mapping is pure (`core/db/rows.ts`), with unit tests, as is coordinate rounding (2 decimals).
+- Journal: rows grouped as time + spot + title (top species or manual text), tap to expand (detections with raw scores, note, Next, source tag, rounded coordinates, mode). The Diagnostics panel and license notice sit at the bottom.
+- Verified on the simulator: seeded 4 entries via the dev channel (`t6-journal-seeded.png`), force-quit, relaunched. The 4 entries are still listed newest first, and the first expands to show the note and Next (`t6-journal-after-restart-expanded.png`). Host-side `sqlite3` check: 4 entries, 4 detections.
