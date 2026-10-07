@@ -42,7 +42,7 @@ fits the RN skill set, can be field-tested this week for the bonus.
 
 ## Phase 3 — Build (Thu–Fri) · agent: `rn-builder`
 - [x] Expo app scaffold (dev build, not Expo Go — native modules needed) — iOS simulator verified; Android build pending
-- [~] Audio capture + BirdNET inference — core audio maths + BirdNET post-processing done and tested (T8); model spike (T9) and mic (T10) pending
+- [~] Audio capture + BirdNET inference — core audio maths + BirdNET post-processing done and tested (T8); mic capture done (T10, simulator); BirdNET model spike (T9) pending
 - [x] Local LLM integration + prompt for field notes (Gemma 3 1B via llama.rn; manual-observation mode end to end)
 - [~] Offline journal storage (SQLite) + simple map/log — SQLite journal done; no map (cut per architecture)
 - [~] README with license notes, setup, model download steps — drafted; BirdNET file details pending T9
