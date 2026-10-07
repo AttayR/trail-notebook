@@ -12,9 +12,9 @@ const HEADER =
   'Calm, concrete, no emojis, no greetings.';
 
 const FOOTER = [
-  'Write exactly two lines:',
-  'NOTE: one or two sentences for the journal.',
-  'NEXT: one short thing to look or listen for in the next few minutes, phrased as an action outdoors.',
+  'Reply with exactly two lines and nothing else:',
+  'NOTE: (one or two calm sentences for the journal about what was noticed)',
+  'NEXT: (one short thing to look or listen for in the next few minutes, as an action outdoors)',
 ].join('\n');
 
 /** Collapse whitespace and neutralise characters that could break the facts block. */

@@ -71,3 +71,18 @@ describe('templates', () => {
     expect(templateManualNote('x', ctx).next).toBe(a.next);
   });
 });
+
+describe('real 1B outputs (simulator, 2026-10-07)', () => {
+  it('strips an echoed instruction and takes the last paragraph as NEXT', () => {
+    const raw =
+      'NOTE: one or two sentences.\nA small brown bird was observed hopping beneath the hedge, exhibiting a short rising whistle twice.\n\nLook for signs of movement in the nearby foliage.';
+    expect(parseNote(raw)).toEqual({
+      note: 'A small brown bird was observed hopping beneath the hedge, exhibiting a short rising whistle twice.',
+      next: 'Look for signs of movement in the nearby foliage.',
+    });
+  });
+  it('strips echoed parenthetical placeholders', () => {
+    const raw = 'NOTE: (one or two calm sentences for the journal about what was noticed) Crows overhead.\nNEXT: Watch the oak.';
+    expect(parseNote(raw)).toEqual({ note: 'Crows overhead.', next: 'Watch the oak.' });
+  });
+});

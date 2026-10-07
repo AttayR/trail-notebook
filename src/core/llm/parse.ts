@@ -3,6 +3,16 @@ import type { NoteResult, ParsedNote } from '../types';
 
 const STOP_TOKENS = /<end_of_turn>|<eos>|<start_of_turn>(model|user)?/gi;
 
+// Instruction text a small model may echo back; removed before use.
+const ECHO = [
+  /\(?one or two (calm )?sentences( for the journal)?( about what was noticed)?\)?\.?/gi,
+  /\(?one short thing to look or listen for[^.)\n]*\)?\.?/gi,
+];
+
+function stripEcho(s: string): string {
+  return ECHO.reduce((acc, re) => acc.replace(re, ' '), s);
+}
+
 function clean(s: string): string {
   return s
     .replace(/\*\*|__|`/g, '')
@@ -29,15 +39,24 @@ export function parseNote(raw: string): ParsedNote | null {
   const noteMatch = /(?:^|\n)\W*note\W*:\s*([\s\S]*?)(?=\n\W*next\W*:|$)/i.exec(text);
   const nextMatch = /(?:^|\n)\W*next\W*:\s*([^\n]*)/i.exec(text);
 
-  let note = noteMatch ? clean(noteMatch[1]) : '';
-  const next = nextMatch ? clean(nextMatch[1]) : '';
+  let noteBody = noteMatch ? stripEcho(noteMatch[1]) : '';
+  let next = nextMatch ? clean(stripEcho(nextMatch[1])) : '';
+
+  // No NEXT label: a 1B model often puts the nudge in a final paragraph instead.
+  if (!next && noteMatch) {
+    const paras = noteBody.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+    if (paras.length >= 2) {
+      next = clean(paras[paras.length - 1]);
+      noteBody = paras.slice(0, -1).join(' ');
+    }
+  }
+  let note = clean(noteBody);
 
   if (!note) {
     // No NOTE label: use whatever prose appears before NEXT (or all of it).
     const before = nextMatch ? text.slice(0, nextMatch.index) : text;
-    note = clean(firstSentences(before.replace(/\n+/g, ' ')));
+    note = clean(firstSentences(stripEcho(before).replace(/\n+/g, ' ')));
   }
-  if (!note && !next) return null;
   if (!note) return null;
   return { note, next };
 }

@@ -7,6 +7,7 @@ import { DownloadProgress } from '../components/DownloadProgress';
 import { LicenseNotice } from '../components/LicenseNotice';
 import { useModels } from '../hooks/useModels';
 import { onDevCommand } from '../services/devCommands';
+import { gemmaWriter } from '../services/llm/gemmaWriter';
 import { colors, spacing } from '../theme';
 
 export default function SetupScreen() {
@@ -15,7 +16,9 @@ export default function SetupScreen() {
   const failed = models.some((m) => m.status === 'error');
 
   useEffect(() => {
-    if (allDone) router.replace('/');
+    if (!allDone) return;
+    gemmaWriter.load().catch(() => {});
+    router.replace('/');
   }, [allDone]);
 
   useEffect(

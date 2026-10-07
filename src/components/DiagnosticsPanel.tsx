@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { GemmaTest } from './GemmaTest';
 import { runNativeChecks, type ModuleCheck } from '../services/nativeCheck';
 import { colors, spacing } from '../theme';
 
@@ -34,6 +35,7 @@ export function DiagnosticsPanel({ autoOpen = false }: { autoOpen?: boolean }) {
               {c.ok ? 'OK' : 'FAIL'}  {c.name}: {c.detail}
             </Text>
           ))}
+          <GemmaTest />
         </View>
       )}
     </View>
