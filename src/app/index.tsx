@@ -15,16 +15,26 @@ import { kv } from '../services/kv';
 import { areRequiredModelsReady } from '../services/models/downloader';
 import { colors, spacing } from '../theme';
 
-export default function ListenScreen() {
+/**
+ * Route wrapper. The redirect lives here, with no other hooks: when the first launch
+ * redirected to Setup, the old `index` stayed mounted under it, and it used to keep its
+ * own observation state and dev-command listener alive (one command produced two entries).
+ */
+export default function ListenRoute() {
   const [ready] = useState(areRequiredModelsReady);
+  if (!ready) return <Redirect href="/setup" />;
+  return <ListenScreen />;
+}
+
+function ListenScreen() {
   const [spot, setSpot] = useState(kv.getLastSpotName);
   const [manualOpen, setManualOpen] = useState(false);
   const { state, runManual, runListen, reset } = useObservation();
 
   // Load BirdNET as soon as Listen is shown so the first tap is fast.
   useEffect(() => {
-    if (ready) birdnet.load().catch((e) => console.warn('[birdnet] load failed', e));
-  }, [ready]);
+    birdnet.load().catch((e) => console.warn('[birdnet] load failed', e));
+  }, []);
 
   useEffect(
     () =>
@@ -41,7 +51,6 @@ export default function ListenScreen() {
     [runManual, runListen, spot],
   );
 
-  if (!ready) return <Redirect href="/setup" />;
   const busy = state.phase !== 'idle' && state.phase !== 'done' && state.phase !== 'nothing' && state.phase !== 'error';
   const showButton = state.phase === 'idle' || state.phase === 'recording';
 

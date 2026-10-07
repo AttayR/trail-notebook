@@ -84,3 +84,14 @@ export function buildManualPrompt(text: string, ctx: ObservationContext): ChatMe
     [MANUAL_RULE],
   );
 }
+
+/**
+ * Manual mode prefill: a time/place opener ("NOTE: Evening at Canal bank.") gives the
+ * entry a journal anchor and pushes the model to continue rather than restate the input.
+ */
+export function manualPrefill(ctx: ObservationContext): string {
+  const pod = partOfDay(ctx.date);
+  const opener = pod.charAt(0).toUpperCase() + pod.slice(1);
+  const spot = ctx.spotName ? sanitizeInput(ctx.spotName, 60) : '';
+  return `NOTE: ${opener}${spot ? ` at ${spot}` : ''}.`;
+}

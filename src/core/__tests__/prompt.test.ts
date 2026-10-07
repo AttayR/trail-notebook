@@ -1,5 +1,5 @@
 import { confidenceWord } from '../birdnet/confidence';
-import { buildListenPrompt, buildManualPrompt, MANUAL_MAX_CHARS, sanitizeInput } from '../llm/prompt';
+import { buildListenPrompt, buildManualPrompt, MANUAL_MAX_CHARS, manualPrefill, sanitizeInput } from '../llm/prompt';
 import type { Detection } from '../types';
 
 const ctx = { date: new Date(2026, 9, 8, 7, 42), lat: 31.52, spotName: 'Riverside path', alreadyToday: ['Rose-ringed Parakeet'] };
@@ -60,5 +60,12 @@ describe('buildManualPrompt', () => {
   it('omits place when no spot name', () => {
     const [m] = buildManualPrompt('crows', { date: ctx.date });
     expect(m.content).not.toContain('- Place:');
+  });
+});
+
+describe('manualPrefill', () => {
+  it('opens with part of day and spot', () => {
+    expect(manualPrefill({ date: new Date(2026, 9, 8, 18, 0), spotName: 'Canal bank' })).toBe('NOTE: Evening at Canal bank.');
+    expect(manualPrefill({ date: new Date(2026, 9, 8, 9, 0) })).toBe('NOTE: Morning.');
   });
 });

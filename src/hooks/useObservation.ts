@@ -8,7 +8,7 @@ import { LISTEN, LLM_PARAMS } from '../config';
 import { isConfident, toDetections } from '../core/birdnet/scores';
 import { startOfLocalDay } from '../core/context/time';
 import { listenPrefill } from '../core/llm/gemmaFormat';
-import { buildListenPrompt, buildManualPrompt, sanitizeInput } from '../core/llm/prompt';
+import { buildListenPrompt, buildManualPrompt, manualPrefill, sanitizeInput } from '../core/llm/prompt';
 import { templateListenNote, templateManualNote } from '../core/llm/template';
 import type { ChatMessage, Detection, EntryMode, NoteResult, ObservationContext, ParsedNote } from '../core/types';
 import { makeId } from '../core/util/id';
@@ -101,7 +101,7 @@ export function useObservation() {
       detections: Detection[];
       buildMessages: (ctx: ObservationContext) => ChatMessage[];
       buildFallback: (ctx: ObservationContext) => ParsedNote;
-      prefill?: string;
+      prefill?: string | ((ctx: ObservationContext) => string);
       opts: RunOptions;
     }) => {
       const { id, t0, mode, spot, loc, detections, opts } = args;
@@ -141,7 +141,7 @@ export function useObservation() {
       const writer = opts.forceTemplate ? failingWriter : gemmaWriter;
       const final = await writeNoteWithFallback(writer, args.buildMessages(ctx), args.buildFallback(ctx), {
         timeoutMs: opts.timeoutMs ?? LLM_PARAMS.timeoutMs,
-        prefill: args.prefill,
+        prefill: typeof args.prefill === 'function' ? args.prefill(ctx) : args.prefill,
         onToken: (acc) => setState((s) => (s.result ? s : { ...s, streaming: acc })),
         onTimeout: (template) => {
           setState((s) => ({ ...s, result: template, streaming: null }));
@@ -178,6 +178,7 @@ export function useObservation() {
           detections: [],
           buildMessages: (ctx) => buildManualPrompt(text, ctx),
           buildFallback: (ctx) => templateManualNote(text, ctx),
+          prefill: manualPrefill,
           opts,
         });
         const elapsedMs = Date.now() - t0;

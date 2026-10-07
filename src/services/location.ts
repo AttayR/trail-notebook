@@ -19,11 +19,15 @@ export async function getCoarseLocation(timeoutMs = LOCATION_TIMEOUT_MS): Promis
   const started = Date.now();
   try {
     let perm = await withTimeout(Location.getForegroundPermissionsAsync(), timeoutMs);
+    console.log(`[location] permission ${perm ? `${perm.status} canAskAgain=${perm.canAskAgain}` : 'timeout'}`);
     if (!perm) return null;
     if (perm.status === 'undetermined' && perm.canAskAgain) {
       perm = await withTimeout(Location.requestForegroundPermissionsAsync(), timeoutMs * 6);
     }
-    if (!perm || perm.status !== 'granted') return null;
+    if (!perm || perm.status !== 'granted') {
+      console.log(`[location] not granted (${perm?.status ?? 'timeout'}), saving without coordinates`);
+      return null;
+    }
     const remaining = Math.max(1000, timeoutMs - (Date.now() - started));
     const last = await Location.getLastKnownPositionAsync({ maxAge: 10 * 60_000 }).catch(() => null);
     const pos =
