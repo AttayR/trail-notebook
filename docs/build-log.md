@@ -101,3 +101,8 @@ Android: not built yet (the emulator path is still open; iOS simulator was enoug
 - Location permission prompt flow (pre-granted on the simulator).
 - Mic capture sample rate and level (T10). The simulator mic is the Mac's input and says nothing about a phone mic.
 - Android build has not been run at all yet.
+
+## T8 Core part 2 (Friday task, done Wednesday night)
+- `core/audio/resample.ts` (linear, plus `clampUnit`), `accumulator.ts` (fixed capacity, drops overflow, progress), `windows.ts` (144k windows with a 72k hop; a short buffer is zero-padded to one window), `level.ts` (RMS and a dB-scaled 0..1 meter), `wav.ts` (PCM 16/24/32 and float32, WAVE_FORMAT_EXTENSIBLE, stereo downmix). `core/birdnet/labels.ts` ("Sci_Common" lines, 6,522 count check) and `scores.ts` (sigmoid with sensitivity, max over windows, top-k with the 0.15 floor, ranked detections, "confident" at 0.5 or above).
+- All architecture-listed core tests pass: 68 in total. The resample test (44.1 kHz 1 kHz sine to 48 kHz) keeps the zero-crossing count within 1%.
+- **Fixture WAV not added yet.** Wikimedia Commons was unreachable from this machine (HTTP 000), and the xeno-canto v2 API is gone (404; v3 needs an API key, which the user would have to create). Candidate for T9: BirdNET-Analyzer's own `birdnet_analyzer/example/soundscape.wav` (11.5 MB, reachable on GitHub). It is ideal for validation because the Analyzer's documented output gives the expected species. Its audio license is not stated, so it will be fetched by script into `models-cache/` and **not committed**. A short CC0/CC BY clip for the repo still needs a source the user can confirm.
