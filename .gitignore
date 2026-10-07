@@ -44,4 +44,7 @@ yarn-error.*
 *.gguf
 *.tflite
 *.pte
-/android
+*.onnx
+*.bin
+models-cache/
+coverage/
