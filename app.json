@@ -1,13 +1,14 @@
 {
   "expo": {
-    "name": "trail-notebook",
+    "name": "Trail Notebook",
     "slug": "trail-notebook",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.hf26.trailnotebook"
     },
     "android": {
       "adaptiveIcon": {
@@ -16,10 +17,57 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.hf26.trailnotebook"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Trail Notebook saves a rough location (about 1 km) with each journal entry. It never leaves your phone."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "buildArchs": [
+              "arm64-v8a"
+            ]
+          }
+        }
+      ],
+      [
+        "llama.rn",
+        {
+          "enableEntitlements": true,
+          "entitlementsProfile": "production",
+          "forceCxx20": true,
+          "enableOpenCLAndHexagon": true
+        }
+      ],
+      "react-native-fast-tflite",
+      [
+        "react-native-audio-api",
+        {
+          "iosMicrophonePermission": "Trail Notebook listens for about 9 seconds to identify birdsong on your phone. Audio is never uploaded or saved.",
+          "androidPermissions": [
+            "android.permission.RECORD_AUDIO"
+          ],
+          "iosBackgroundMode": false,
+          "androidForegroundService": false,
+          "disableFFmpeg": true
+        }
+      ]
+    ],
+    "scheme": "trailnotebook",
+    "experiments": {
+      "typedRoutes": true
     }
   }
 }

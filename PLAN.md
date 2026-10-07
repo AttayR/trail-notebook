@@ -41,11 +41,13 @@ fits the RN skill set, can be field-tested this week for the bonus.
 - Output: `docs/architecture.md` + task breakdown
 
 ## Phase 3 — Build (Thu–Fri) · agent: `rn-builder`
-- [ ] Expo app scaffold (dev build, not Expo Go — native modules needed)
-- [ ] Audio capture + BirdNET inference
-- [ ] Local LLM integration + prompt for field notes
-- [ ] Offline journal storage (SQLite) + simple map/log
-- [ ] README with license notes, setup, model download steps
+- [x] Expo app scaffold (dev build, not Expo Go — native modules needed) — iOS simulator + Android (Galaxy S23 Ultra) verified
+- [x] Audio capture + BirdNET inference — BirdNET V2.4 FP16 via fast-tflite matches desktop reference; mic 48 kHz on S23 Ultra; Listen flow end to end (T9–T11)
+- [x] Local LLM integration + prompt for field notes (Gemma 3 1B via llama.rn; manual-observation mode end to end)
+- [~] Offline journal storage (SQLite) + simple map/log — SQLite journal done; no map (cut per architecture)
+- [x] README with license notes, setup, model download steps (T13) + MIT LICENSE excluding weights
+- [x] Metrics capture + JSON export (T12)
+- [~] Release builds (T14) — Android release APK built (134 MB, arm64, no weights); install + instrumented offline run on phone and iOS Release build pending (offline flow user-reported on S23 Ultra)
 - [ ] 👤 Create public GitHub repo (Claude prepares; user approves push)
 
 ## Phase 4 — QA + Field test (Fri evening–Sat) · agent: `qa-tester`
