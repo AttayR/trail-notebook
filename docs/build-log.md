@@ -79,3 +79,25 @@ Android: not built yet (the emulator path is still open; iOS simulator was enoug
 - Row-to-domain mapping is pure (`core/db/rows.ts`), with unit tests, as is coordinate rounding (2 decimals).
 - Journal: rows grouped as time + spot + title (top species or manual text), tap to expand (detections with raw scores, note, Next, source tag, rounded coordinates, mode). The Diagnostics panel and license notice sit at the bottom.
 - Verified on the simulator: seeded 4 entries via the dev channel (`t6-journal-seeded.png`), force-quit, relaunched. The 4 entries are still listed newest first, and the first expands to show the note and Next (`t6-journal-after-restart-expanded.png`). Host-side `sqlite3` check: 4 entries, 4 detections.
+
+## T7 Manual observation flow (demo floor)
+- Listen screen: `StatusChip` (Gemma idle / warming up / Ready / unavailable), a disabled `ListenButton` placeholder until BirdNET lands (caption explains), `ManualInput` open by default while listen mode is unavailable, `SpotNameField` (remembers the last value in kv), and a `ResultCard` with a streaming `NoteText`.
+- `hooks/useManualNote.ts`: sanitise the input, then fetch coarse location (5 s bound, rounded to 2 decimals) and "already logged today" in parallel, then build the manual prompt, then run Gemma with the soft timeout. The entry is auto-saved; saves are serialised so a late Gemma update never runs before the template insert.
+- `services/location.ts`: every location call is time-bounded (the T2 lesson). The last known position is preferred over a fresh fix.
+- Simulator setup for this test: `xcrun simctl privacy booted grant location com.hf26.trailnotebook` and `xcrun simctl location booted set 31.5204,74.3587` (the permission alert cannot be tapped headless).
+- Verified (iPhone 17 simulator):
+  1. Normal: "three crows chasing a hawk over the canal, loud harsh calls" at Canal bank. Gemma note plus Next in **3.1 s** end to end, `note_source=gemma`, lat/lon stored as 31.52 / 74.36 (`t7-manual-streaming.png`, `t7-manual-result.png`).
+  2. Soft timeout forced to 300 ms: the template note appears and is saved first ("Saved a quick note; Gemma is still writing..."). Gemma finishes at 2.0 s and the row is updated to `note_source=gemma` (`t7-timeout-template-first.png`, `t7-timeout-gemma-replaced.png`).
+  3. Forced Gemma failure: the template note is saved with `note_source=template` in 40 ms (`t7-forced-template.png`).
+  4. Force-quit and relaunch: all three entries are in Journal, newest first, with correct sources (`t7-journal-after-restart.png`).
+- Not verified here: airplane mode (simulator limitation, see T5). Real-phone timing.
+- Observed note quality (for the write-up): "Three crows are actively pursuing a hawk over the canal." / Next: "Listen for the hawk's calls." It is correct but plain. Prompt tuning for a warmer field-journal voice is a good follow-up.
+
+## Must re-verify on a real device
+- Airplane-mode run of the whole manual flow (offline proof for the post).
+- Gemma load time, TTFT and tok/s on the phone (simulator numbers come from the Mac's GPU and are not representative). Check `n_gpu_layers` on Android (CPU first).
+- Peak RAM with Gemma loaded (Xcode memory gauge / `dumpsys meminfo`).
+- In-app 722 MB download over phone Wi-Fi (iOS uses a background URLSession by default; check that backgrounding the app does not break it).
+- Location permission prompt flow (pre-granted on the simulator).
+- Mic capture sample rate and level (T10). The simulator mic is the Mac's input and says nothing about a phone mic.
+- Android build has not been run at all yet.

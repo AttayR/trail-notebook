@@ -41,11 +41,11 @@ fits the RN skill set, can be field-tested this week for the bonus.
 - Output: `docs/architecture.md` + task breakdown
 
 ## Phase 3 — Build (Thu–Fri) · agent: `rn-builder`
-- [ ] Expo app scaffold (dev build, not Expo Go — native modules needed)
+- [x] Expo app scaffold (dev build, not Expo Go — native modules needed) — iOS simulator verified; Android build pending
 - [ ] Audio capture + BirdNET inference
-- [ ] Local LLM integration + prompt for field notes
-- [ ] Offline journal storage (SQLite) + simple map/log
-- [ ] README with license notes, setup, model download steps
+- [x] Local LLM integration + prompt for field notes (Gemma 3 1B via llama.rn; manual-observation mode end to end)
+- [~] Offline journal storage (SQLite) + simple map/log — SQLite journal done; no map (cut per architecture)
+- [~] README with license notes, setup, model download steps — drafted; BirdNET file details pending T9
 - [ ] 👤 Create public GitHub repo (Claude prepares; user approves push)
 
 ## Phase 4 — QA + Field test (Fri evening–Sat) · agent: `qa-tester`

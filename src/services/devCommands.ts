@@ -9,7 +9,7 @@ export type DevCommand =
   | { action: 'navigate'; href: string }
   | { action: 'setupDownload' }
   | { action: 'testGemma' }
-  | { action: 'manualNote'; text: string; spot?: string }
+  | { action: 'manualNote'; text: string; spot?: string; timeoutMs?: number; forceTemplate?: boolean }
   | { action: 'deleteModels' }
   | { action: 'seedEntries'; count?: number };
 

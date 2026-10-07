@@ -13,7 +13,11 @@ interface Props {
 
 export function NoteText({ note, next, source, streaming }: Props) {
   if (streaming != null) {
-    const shown = streaming.replace(/\*\*/g, '').trim();
+    const shown = streaming
+      .replace(/\*\*/g, '')
+      .replace(/^\s*NOTE:\s*/i, '')
+      .replace(/\n\s*NEXT:\s*/i, '\nNext: ')
+      .trim();
     return (
       <View>
         <Text style={styles.note}>{shown || 'Gemma is writing...'}</Text>
